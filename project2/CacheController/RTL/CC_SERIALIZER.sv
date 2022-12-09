@@ -37,18 +37,11 @@ module CC_SERIALIZER
 
 	always_comb 
 	begin
-       	rvalid 		= 1'b0;
-	   	rdata  		= {(64){1'b0}};
-	   	rlast  		= 1'b0;
+       	rvalid 		= !fifo_empty_i;
 		offset		= fifo_rdata_i[517-:3];
 		index_n		= index;
-
-		if(rready_i) begin
-			rvalid		= 1'b1; //chage after, like (1'b1 && fifo_empty); 
-			index_n 	= index + 1;
-			rlast		= (0 == index_n) ? 1 : 0;
-
-			case (index+offset) 
+		rlast  		= 1'b0;
+		case (index+offset) 
 				3'b000: begin
 					rdata	= fifo_rdata_i[511-:64];
 				end
@@ -73,7 +66,14 @@ module CC_SERIALIZER
 				3'b111: begin
 					rdata	= fifo_rdata_i[63-:64];
 				end
-			endcase
+				default : begin
+					rdata 	= {(64){1'b0}};
+				end
+		endcase
+		
+		if(rready_i && rvalid) begin
+			index_n 	= index + 1;
+			rlast		= (0 == index_n) ? 1 : 0;
 		end
 	end
 

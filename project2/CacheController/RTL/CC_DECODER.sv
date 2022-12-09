@@ -25,7 +25,7 @@ module CC_DECODER
 	
 	//output port
 	assign inct_arready_o 	= !ready_gen_n;
-	assign hs_pulse_o		= (inct_arvalid_i) && (!ready_gen_n);
+	assign hs_pulse_o		= (inct_arvalid_i) && (inct_arready_o);
 	assign tag_o 			= inct_araddr_i[31:15];
 	assign index_o			= inct_araddr_i[14:6];
 	assign offset_o			= inct_araddr_i[5:0];

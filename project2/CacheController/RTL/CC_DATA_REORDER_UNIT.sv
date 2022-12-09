@@ -62,17 +62,7 @@ module CC_DATA_REORDER_UNIT
 
     // MC R ch
     reg             mem_rready;
-    // flag_fifo signal
-    // wire flag_fifo_rden_i  = inct_rlast;
-
-    always_ff @(posedge clk)
-		if (!rst_n) begin
-			
-		end	
-		else begin
-			
-		end
-
+    
     always_comb 
 	begin
         inct_rvalid         = 1'b0;
@@ -86,23 +76,21 @@ module CC_DATA_REORDER_UNIT
 
         if(!hit_flag_fifo_empty_o) begin
             if(hit_flag_fifo_rdata_o) begin // hit data from Serializer
-                if(inct_rready_i)
-                    serial_rready_o    = 1'b1;
+                serial_rready_o    = 1'b1;
                 //if(serial_rvalid_i)
                 inct_rdata  = serial_rdata_i;
                 inct_rlast  = serial_rlast_i;
-                inct_rvalid = serial_rvalid_i;
-                if(serial_rlast_i)
+                inct_rvalid = serial_rvalid_i && serial_rready_o;
+                if(inct_rlast && inct_rvalid && inct_rready_i)
                         hit_flag_fifo_rden_o = 1'b1;
             end
             else begin
-                if(inct_rready_i)
                     mem_rready = 1'b1;
                 //if(mem_rvalid_i) begin
                     inct_rdata  = mem_rdata_i;
                     inct_rlast  = mem_rlast_i;
-                    inct_rvalid = mem_rvalid_i;
-                    if(mem_rlast_i && mem_rvalid_i && mem_rready)
+                    inct_rvalid = (mem_rready && mem_rvalid_i);
+                    if(inct_rlast && inct_rvalid && inct_rready_i)
                         hit_flag_fifo_rden_o = 1'b1;
                 //end
             end
